@@ -1,0 +1,20 @@
+// prisma/schema.prisma
+
+generator client {
+    provider = "prisma-client-js"
+}
+datasource db {
+  provider  = "postgresql"
+  url  	    = env("DATABASE_URL")
+  
+}
+
+model product{
+    product_id String @unique @id @default(uuid())
+    product_image_url String
+    product_price String
+    product_title String
+    product_rating String
+    product_category_group String
+    product_location String
+}
