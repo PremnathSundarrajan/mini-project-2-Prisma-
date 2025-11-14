@@ -7,111 +7,137 @@ const app = express();
 app.use(express.json());
 
 app.get("/", async (req, res) => {
-  const data = await prisma.product.findMany();
-  console.log(data);
-  res.send(data);
-});
-
-app.get("/:id", async (req, res) => {
-  const id = req.params.id;
-
-  const data = await prisma.product.findUnique({ where: { product_id: id } });
-
-  if (!data) {
-    return res.status(404).json({ message: `Product ${id} not Found` });
-  }
-
-  res.json(data);
-});
-
-app.post("/products", async (req, res) => {
   try {
+    //Data from Frontend
+
+    //DB logic
+    const data = await prisma.restaurant.findMany();
+    console.log(data);
+
+    //Data to Frontend
+    res.status(200).json({ data: data, message: "All items are fetched Successfully" });
+  } catch (err) {
+    res.status(500).json({ err: err, message: "Internal Server Error" });
+  }
+});
+
+app.get("/get", async (req, res) => {
+  try {
+    //Data from Frontend
+    const { id } = req.headers;
+
+    //DB logic
+    const data = await prisma.restaurant.findUnique({
+      where: { restaurant_id: id },
+    });
+
+    if (!data) {
+      return res.status(404).json({ message: `Restaurant ${id} not Found` });
+    }
+
+    //Data to Frontend
+    res.status(200).json({ data: data, message: "Restaurant Found" });
+  } catch (err) {
+    res.status(500).json({ err: err, message: "Internal Server Error" });
+  }
+});
+
+app.post("/restaurants", async (req, res) => {
+  try {
+    //Data from Frontend
     const data = req.body;
 
-    const add = await prisma.product.create({
+    //DB logic
+    const add = await prisma.restaurant.create({
       data: {
-        product_image_url: data.product_image_url,
-        product_price: data.product_price,
-        product_title: data.product_title,
-        product_rating: data.product_rating,
-        product_category_group: data.product_category_group,
-        product_location: data.product_location,
+        restaurant_image_url: data.restaurant_image_url,
+        restaurant_price: data.restaurant_price,
+        restaurant_title: data.restaurant_title,
+        restaurant_rating: data.restaurant_rating,
+        restaurant_category_group: data.restaurant_category_group,
+        restaurant_location: data.restaurant_location,
       },
     });
     console.log(add);
 
-    res.status(200).json(add);
+    //Data to Frontend
+    res.status(200).json({ data: add, message: "Created Successfully" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal Error" });
   }
 });
 
-app.put("/products/update", async (req, res) => {
+app.put("/restaurants/update", async (req, res) => {
   try {
+    //Data from Frontend
     const data = req.body;
 
-    const check = await prisma.product.findUnique({
-      where: { product_id: data.product_id },
+    //DB logic
+    const check = await prisma.restaurant.findUnique({
+      where: { restaurant_id: data.restaurant_id },
     });
 
     if (!check) {
-      return res.status(404).json({ message: "Data Not Found" });
+      return res.status(404).json({ message: "Restaurant Not Found" });
     }
-    const upd = await prisma.product.update({
-      where: { product_id: data.product_id },
-      data: {
-        product_image_url: data.product_image_url,
-        product_price: data.product_price,
-        product_title: data.product_title,
-        product_rating: data.product_rating,
-        product_category_group: data.product_category_group,
-        product_location: data.product_location,
-      },
+    const upd = await prisma.restaurant.update({
+      where: { restaurant_id: data.restaurant_id },
+      data,
     });
 
-    res.status(200).json(upd);
+    //Data to Frontend
+    res.status(200).json({ data: upd, message: "Updated Successfully" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
-app.patch("/products/specific/update/:id", async (req, res) => {
+app.patch("/restaurants/specific/update", async (req, res) => {
   try {
-    const id = req.params.id;
+    //Data from Frontend
     const data = req.body;
 
-    const check = await prisma.product.findUnique({
-      where: { product_id: id },
+    //DB logic
+    const check = await prisma.restaurant.findUnique({
+      where: { restaurant_id: data.restaurant_id },
     });
 
     if (!check) {
       return res.json(404).json({ message: "Data Not found" });
     }
 
-    const update = await prisma.product.update({
-      where: { product_id: id },
+    const update = await prisma.restaurant.update({
+      where: { restaurant_id: data.restaurant_id },
       data,
     });
 
-    res.status(200).json(update);
+    //Data to Frontend
+    res.status(200).json({ data: update, message: "updated successfully" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
-app.delete("/delete/:id", async (req, res) => {
+app.delete("/delete", async (req, res) => {
   try {
-    const id = req.params.id;
+    //Data from Frontend
+    const { id } = req.query;
 
-    const get = await prisma.product.findUnique({ where: { product_id: id } });
+    //DB logic
+    const get = await prisma.restaurant.findUnique({
+      where: { restaurant_id: id },
+    });
 
     if (!get) return res.status(404).json({ message: "Data is missing" });
 
-    const del = await prisma.product.delete({ where: { product_id: id } });
+    const del = await prisma.restaurant.delete({
+      where: { restaurant_id: id },
+    });
 
+    //Data to Frontend
     res.json({ message: "Deleted successfully" });
   } catch (err) {
     console.error(err);
